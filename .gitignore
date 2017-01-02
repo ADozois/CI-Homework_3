@@ -31,3 +31,7 @@
 # Debug files
 *.dSYM/
 *.su
+
+# Ignoring user setting file
+*.idea/modules.xml
+.idea/tasks.xml
