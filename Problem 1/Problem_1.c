@@ -60,7 +60,13 @@ void createLayer(Layer *layer, int numberNeurons, int numberWeights);
 
 void initialiseNeuron(Neuron *neuron, int nbrWeights);
 
-double linearFunc(double input);
+void computeInput(VQ *network, double input1, double input2);
+
+void computeActivation(Neuron *neuron, double input1, double input2);
+
+void computeOutput(VQ *network);
+
+void computeNetwork(VQ *network, double input1, double input2);
 
 int main(void) {
   char *path = "/home/gemini/TUM/CI/CI-Homework_3/Problem 1/testInput21A.txt";
@@ -144,6 +150,22 @@ void initialiseNeuron(Neuron *neuron, int nbrWeights) {
   }
 }
 
-double linearFunc(double input) {
-  return input;
+void computeInput(VQ *network, double input1, double input2){
+  network->Input.Neurons[0].Output = input1;
+  network->Input.Neurons[1].Output = input2;
+}
+
+void computeActivation(Neuron *neuron, double input1, double input2){
+  neuron->Output = input1 * neuron->Weights[0] + input2 * neuron->Weights[1];
+}
+
+void computeOutput(VQ *network){
+  for (int i = 0; i < network->Output.size; ++i) {
+    computeActivation(&(network->Output.Neurons[i]),network->Input.Neurons[0].Output,network->Input.Neurons[1].Output);
+  }
+}
+
+void computeVQ(VQ *network, double input1, double input2){
+  computeInput(network, input1, input2);
+  computeOutput(network);
 }
