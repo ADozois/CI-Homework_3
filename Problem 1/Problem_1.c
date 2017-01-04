@@ -78,14 +78,28 @@ void train(VQ *network, Data *data);
 
 void printClusterCenters(VQ *network);
 
+void printDebug(VQ *network);
+
+
 int main(void) {
   char *path = "/home/gemini/TUM/CI/CI-Homework_3/Problem 1/testInput21A.txt";
+  char buff[100];
+  int i = 0, flag = 0;
   Data data;
   VQ network;
 
   srand((unsigned) time(NULL)); //Seed initialisation
 
-  parseFile(path, &data);
+  while(scanf("%s",buff) == 1) {
+    if (flag == 0) {
+      data.NbrCluster = atoi(buff);
+      flag = 1;
+    } else{
+      parseLine(buff, &(data.Values[i]));
+      ++i;
+    }
+  }
+  data.size = i;
 
   createVQ(&network, NBR_INPUT_NEURONS, data.NbrCluster);
 
@@ -190,7 +204,7 @@ void updateWinning(Neuron *neuron, double input1, double input2){
   neuron->Update[0] = LEARNING_RATE * (input1 - neuron->Weights[0]);
   neuron->Update[1] = LEARNING_RATE * (input2 - neuron->Weights[1]);
   neuron->Weights[0] = neuron->Weights[0] + neuron->Update[0];
-  neuron->Weights[1] = neuron->Weights[0] + neuron->Update[1];
+  neuron->Weights[1] = neuron->Weights[1] + neuron->Update[1];
 }
 
 void pickWinner(VQ *network, double input1, double input2){
@@ -220,6 +234,12 @@ void train(VQ *network, Data *data){
 }
 
 void printClusterCenters(VQ *network){
+  for (int i = 0; i < network->Output.size; ++i) {
+    printf("%f,%f\n",network->Output.Neurons[i].Weights[0],network->Output.Neurons[i].Weights[1]);
+  }
+}
+
+void printDebug(VQ *network){
   for (int i = 0; i < network->Output.size; ++i) {
     printf("Cluster %d: %f, %f\n",i+1,network->Output.Neurons[i].Weights[0],network->Output.Neurons[i].Weights[1]);
   }
