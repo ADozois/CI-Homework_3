@@ -72,6 +72,8 @@ void computeVQ(VQ *network, double input1, double input2);
 
 void updateWinning(Neuron *neuron, double input1, double input2);
 
+void pushLoser(Neuron *neuron, double input1, double input2);
+
 void pickWinner(VQ *network, double input1, double input2);
 
 void train(VQ *network, Data *data);
@@ -82,7 +84,7 @@ void printDebug(VQ *network);
 
 
 int main(void) {
-  char *path = "/home/gemini/TUM/CI/CI-Homework_3/Problem 1/testInput21A.txt";
+  char *path = "/home/gemini/TUM/CI/CI-Homework_3/Problem 1/testInput21B.txt";
   char buff[100];
   int i = 0, flag = 0;
   Data data;
@@ -90,7 +92,7 @@ int main(void) {
 
   srand((unsigned) time(NULL)); //Seed initialisation
 
-  while(scanf("%s",buff) == 1) {
+  /*while(scanf("%s",buff) == 1) {
     if (flag == 0) {
       data.NbrCluster = atoi(buff);
       flag = 1;
@@ -99,13 +101,17 @@ int main(void) {
       ++i;
     }
   }
-  data.size = i;
+  data.size = i;*/
+
+  parseFile(path,&data);
 
   createVQ(&network, NBR_INPUT_NEURONS, data.NbrCluster, &data);
 
   train(&network,&data);
 
-  printClusterCenters(&network);
+  //printClusterCenters(&network);
+
+  printDebug(&network);
 
   return 0;
 }
@@ -120,6 +126,9 @@ void parseFile(char *path, Data *data) {
   if (file) {
     fgets(buff, size, (FILE *) file);
     data->NbrCluster = atoi(buff);
+    if (data->NbrCluster == 0){
+      return;
+    }
     while (fgets(buff, size, (FILE *) file) != NULL) {
       parseLine(buff, &(data->Values[i]));
       i++;
@@ -207,6 +216,13 @@ void updateWinning(Neuron *neuron, double input1, double input2){
   neuron->Weights[1] = neuron->Weights[1] + neuron->Update[1];
 }
 
+void pushLoser(Neuron *neuron, double input1, double input2){
+  neuron->Update[0] = LEARNING_RATE * (input1 - neuron->Weights[0]);
+  neuron->Update[1] = LEARNING_RATE * (input2 - neuron->Weights[1]);
+  neuron->Weights[0] = neuron->Weights[0] - neuron->Update[0];
+  neuron->Weights[1] = neuron->Weights[1] - neuron->Update[1];
+}
+
 void pickWinner(VQ *network, double input1, double input2){
   double x, y, dist, min = 1000000;
   int index = 0;
@@ -222,6 +238,11 @@ void pickWinner(VQ *network, double input1, double input2){
   }
 
   updateWinning(&(network->Output.Neurons[index]), input1, input2);
+
+  for (int i = 0; i < network->Output.size; ++i) {
+    if (i != index)
+      pushLoser(&(network->Output.Neurons[i]), input1, input2);
+  }
 }
 
 void train(VQ *network, Data *data){
