@@ -68,11 +68,15 @@ void computeActivation(Neuron *neuron, double input1, double input2);
 
 void computeOutput(VQ *network);
 
-void computeNetwork(VQ *network, double input1, double input2);
+void computeVQ(VQ *network, double input1, double input2);
 
 void updateWinning(Neuron *neuron, double input1, double input2);
 
 void pickWinner(VQ *network, double input1, double input2);
+
+void train(VQ *network, Data *data);
+
+void printClusterCenters(VQ *network);
 
 int main(void) {
   char *path = "/home/gemini/TUM/CI/CI-Homework_3/Problem 1/testInput21A.txt";
@@ -198,4 +202,16 @@ void pickWinner(VQ *network, double input1, double input2){
   }
 
   updateWinning(&(network->Output.Neurons[index]), input1, input2);
+}
+
+void train(VQ *network, Data *data){
+  for (int i = 0; i < data->size; ++i) {
+    pickWinner(network,data->Values[i].Input1,data->Values[i].Input2);
+  }
+}
+
+void printClusterCenters(VQ *network){
+  for (int i = 0; i < network->Output.size; ++i) {
+    printf("Cluster %d: %f, %f\n",i+1,network->Output.Neurons[i].Weights[0],network->Output.Neurons[i].Weights[1]);
+  }
 }
