@@ -6,7 +6,7 @@
 #include <math.h>
 
 #define NBR_INPUT_NEURONS 2
-#define WEIGHT_MAX 0.001
+#define WEIGHT_MAX 0.7
 #define LEARNING_RATE 0.01
 
 
@@ -83,9 +83,15 @@ int main(void) {
   Data data;
   VQ network;
 
+  srand((unsigned) time(NULL)); //Seed initialisation
+
   parseFile(path, &data);
 
   createVQ(&network, NBR_INPUT_NEURONS, data.NbrCluster);
+
+  train(&network,&data);
+
+  printClusterCenters(&network);
 
   return 0;
 }
@@ -192,8 +198,8 @@ void pickWinner(VQ *network, double input1, double input2){
   int index = 0;
 
   for (int i = 0; i < network->Output.size; ++i) {
-    x = fabs(network->Output.Neurons[i].Weights[0] - input1);
-    y = fabs(network->Output.Neurons[i].Weights[1] - input2);
+    x = network->Output.Neurons[i].Weights[0] - input1;
+    y = network->Output.Neurons[i].Weights[1] - input2;
     dist = sqrt(pow(x,2.0) + pow(y,2.0));
     if (dist < min){
       min = dist;
@@ -205,13 +211,23 @@ void pickWinner(VQ *network, double input1, double input2){
 }
 
 void train(VQ *network, Data *data){
-  for (int i = 0; i < data->size; ++i) {
-    pickWinner(network,data->Values[i].Input1,data->Values[i].Input2);
+  for (int j = 0; j < 10000; ++j) {
+    for (int i = 0; i < data->size; ++i) {
+      pickWinner(network,data->Values[i].Input1,data->Values[i].Input2);
+    }
   }
+
 }
 
 void printClusterCenters(VQ *network){
   for (int i = 0; i < network->Output.size; ++i) {
     printf("Cluster %d: %f, %f\n",i+1,network->Output.Neurons[i].Weights[0],network->Output.Neurons[i].Weights[1]);
   }
+  printf("[");
+  for (int i = 0; i < network->Output.size; ++i) {
+    printf("[%f, %f]",network->Output.Neurons[i].Weights[0],network->Output.Neurons[i].Weights[1]);
+    if (i < network->Output.size -1 )
+      printf(",");
+  }
+  printf("]");
 }
