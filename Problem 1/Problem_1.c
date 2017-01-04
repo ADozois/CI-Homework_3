@@ -6,8 +6,8 @@
 #include <math.h>
 
 #define NBR_INPUT_NEURONS 2
-#define WEIGHT_MAX 0.7
-#define LEARNING_RATE 0.01
+#define WEIGHT_MAX 0.5
+#define LEARNING_RATE 0.00001
 
 
 typedef struct Data Data;
@@ -82,7 +82,7 @@ void printDebug(VQ *network);
 
 
 int main(void) {
-  char *path = "/home/gemini/TUM/CI/CI-Homework_3/Problem 1/testInput21A.txt";
+  char *path = "/home/gemini/TUM/CI/CI-Homework_3/Problem 1/testInput21B.txt";
   char buff[100];
   int i = 0, flag = 0;
   Data data;
@@ -90,7 +90,7 @@ int main(void) {
 
   srand((unsigned) time(NULL)); //Seed initialisation
 
-  while(scanf("%s",buff) == 1) {
+  /*while(scanf("%s",buff) == 1) {
     if (flag == 0) {
       data.NbrCluster = atoi(buff);
       flag = 1;
@@ -99,13 +99,15 @@ int main(void) {
       ++i;
     }
   }
-  data.size = i;
+  data.size = i;*/
+
+  parseFile(path,&data);
 
   createVQ(&network, NBR_INPUT_NEURONS, data.NbrCluster);
 
   train(&network,&data);
 
-  printClusterCenters(&network);
+  printDebug(&network);
 
   return 0;
 }
@@ -225,7 +227,7 @@ void pickWinner(VQ *network, double input1, double input2){
 }
 
 void train(VQ *network, Data *data){
-  for (int j = 0; j < 10000; ++j) {
+  for (int j = 0; j < 1000000; ++j) {
     for (int i = 0; i < data->size; ++i) {
       pickWinner(network,data->Values[i].Input1,data->Values[i].Input2);
     }
