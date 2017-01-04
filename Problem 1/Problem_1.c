@@ -52,15 +52,15 @@ void parseFile(char *file, Data *data);
 
 void parseLine(char *line, Value *data);
 
-void createVQ(VQ *network, int neuronsInput, int neuronsOutput);
+void createVQ(VQ *network, int neuronsInput, int neuronsOutput, Data *data);
 
-void createInputLayer(VQ *network, int numberNeurons);
+void createInputLayer(VQ *network, int numberNeurons, Data *data);
 
-void createOutputLayer(VQ *network, int numberNeurons);
+void createOutputLayer(VQ *network, int numberNeurons, Data *data);
 
-void createLayer(Layer *layer, int numberNeurons, int numberWeights);
+void createLayer(Layer *layer, int numberNeurons, int numberWeights, Data *data);
 
-void initialiseNeuron(Neuron *neuron, int nbrWeights);
+void initialiseNeuron(Neuron *neuron, int nbrWeights, Data *data);
 
 void computeInput(VQ *network, double input1, double input2);
 
@@ -79,7 +79,7 @@ void train(VQ *network, Data *data);
 void printClusterCenters(VQ *network);
 
 int main(void) {
-  char *path = "/home/gemini/TUM/CI/CI-Homework_3/Problem 1/testInput21A.txt";
+  char *path = "/home/gemini/TUM/CI/CI-Homework_3/Problem 1/testInput21B.txt";
   Data data;
   VQ network;
 
@@ -87,7 +87,7 @@ int main(void) {
 
   parseFile(path, &data);
 
-  createVQ(&network, NBR_INPUT_NEURONS, data.NbrCluster);
+  createVQ(&network, NBR_INPUT_NEURONS, data.NbrCluster, &data);
 
   train(&network,&data);
 
@@ -132,38 +132,38 @@ void parseLine(char *line, Value *data) {
   data->Input2 = strtod(token[1], NULL);
 }
 
-void createVQ(VQ *network, int neuronsInput, int neuronsOutput) {
-  createInputLayer(network, neuronsInput);
-  createOutputLayer(network, neuronsOutput);
+void createVQ(VQ *network, int neuronsInput, int neuronsOutput, Data *data) {
+  createInputLayer(network, neuronsInput, data);
+  createOutputLayer(network, neuronsOutput, data);
 }
 
-void createInputLayer(VQ *network, int numberNeurons) {
-  createLayer(&network->Input, numberNeurons, 0);
+void createInputLayer(VQ *network, int numberNeurons, Data *data) {
+  createLayer(&network->Input, numberNeurons, 0, data);
 }
 
-void createOutputLayer(VQ *network, int numberNeurons) {
-  createLayer(&network->Output, numberNeurons, 2);
+void createOutputLayer(VQ *network, int numberNeurons, Data *data) {
+  createLayer(&network->Output, numberNeurons, 2, data);
 }
 
-void createLayer(Layer *layer, int numberNeurons, int numberWeights) {
+void createLayer(Layer *layer, int numberNeurons, int numberWeights, Data *data) {
   layer->Neurons = (Neuron *) malloc(sizeof(Neuron) * numberNeurons);
   layer->size = numberNeurons;
   layer->Previous = NULL;
   layer->Next = NULL;
   for (int i = 0; i < numberNeurons; ++i) {
-    initialiseNeuron(&(layer->Neurons[i]), numberWeights);
+    initialiseNeuron(&(layer->Neurons[i]), numberWeights, data);
   }
 }
 
-void initialiseNeuron(Neuron *neuron, int nbrWeights) {
-  int i = 0;
+void initialiseNeuron(Neuron *neuron, int nbrWeights, Data *data) {
+  int index;
   neuron->Output = 0;
   neuron->Delta = 0;
   neuron->Weights = (double *) malloc(sizeof(double) * nbrWeights);
   neuron->Update = (double *) calloc(nbrWeights, sizeof(double));
-  for (i = 0; i < nbrWeights; ++i) {
-    neuron->Weights[i] = WEIGHT_MAX * ((double) rand() / (double) RAND_MAX - 0.5);
-  }
+  index =  (int)floor((data->size+1)*(double)rand()/RAND_MAX);
+  neuron->Weights[0] = data->Values[index].Input1;
+  neuron->Weights[1] = data->Values[index].Input2;
 }
 
 void computeInput(VQ *network, double input1, double input2){
@@ -227,7 +227,7 @@ void printClusterCenters(VQ *network){
   for (int i = 0; i < network->Output.size; ++i) {
     printf("[%f, %f]",network->Output.Neurons[i].Weights[0],network->Output.Neurons[i].Weights[1]);
     if (i < network->Output.size -1 )
-      printf(",");
+      printf(", ");
   }
   printf("]");
 }
