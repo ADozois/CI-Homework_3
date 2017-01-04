@@ -7,6 +7,8 @@
 
 #define NBR_INPUT_NEURONS 2
 #define WEIGHT_MAX 0.001
+#define LEARNING_RATE 0.01
+
 
 typedef struct Data Data;
 typedef struct Value Value;
@@ -67,6 +69,10 @@ void computeActivation(Neuron *neuron, double input1, double input2);
 void computeOutput(VQ *network);
 
 void computeNetwork(VQ *network, double input1, double input2);
+
+void updateWinning(Neuron *neuron, double input1, double input2);
+
+void pickWinner(VQ *network, double input1, double input2);
 
 int main(void) {
   char *path = "/home/gemini/TUM/CI/CI-Homework_3/Problem 1/testInput21A.txt";
@@ -168,4 +174,28 @@ void computeOutput(VQ *network){
 void computeVQ(VQ *network, double input1, double input2){
   computeInput(network, input1, input2);
   computeOutput(network);
+}
+
+void updateWinning(Neuron *neuron, double input1, double input2){
+  neuron->Update[0] = LEARNING_RATE * (input1 - neuron->Weights[0]);
+  neuron->Update[1] = LEARNING_RATE * (input2 - neuron->Weights[1]);
+  neuron->Weights[0] = neuron->Weights[0] + neuron->Update[0];
+  neuron->Weights[1] = neuron->Weights[0] + neuron->Update[1];
+}
+
+void pickWinner(VQ *network, double input1, double input2){
+  double x, y, dist, min = 1000000;
+  int index = 0;
+
+  for (int i = 0; i < network->Output.size; ++i) {
+    x = fabs(network->Output.Neurons[i].Weights[0] - input1);
+    y = fabs(network->Output.Neurons[i].Weights[1] - input2);
+    dist = sqrt(pow(x,2.0) + pow(y,2.0));
+    if (dist < min){
+      min = dist;
+      index = i;
+    }
+  }
+
+  updateWinning(&(network->Output.Neurons[index]), input1, input2);
 }
