@@ -6,8 +6,10 @@
 #include <math.h>
 
 #define NBR_INPUT_NEURONS 2
-#define WEIGHT_MAX 0.5
-#define LEARNING_RATE 0.00001
+#define WEIGHT_MAX 0.7
+#define LEARNING_RATE 0.01
+#define EPOXH_MAX 100000
+#define LAMBDA 2
 
 
 typedef struct Data Data;
@@ -52,15 +54,15 @@ void parseFile(char *file, Data *data);
 
 void parseLine(char *line, Value *data);
 
-void createVQ(VQ *network, int neuronsInput, int neuronsOutput);
+void createVQ(VQ *network, int neuronsInput, int neuronsOutput, Data *data);
 
-void createInputLayer(VQ *network, int numberNeurons);
+void createInputLayer(VQ *network, int numberNeurons, Data *data);
 
-void createOutputLayer(VQ *network, int numberNeurons);
+void createOutputLayer(VQ *network, int numberNeurons, Data *data);
 
-void createLayer(Layer *layer, int numberNeurons, int numberWeights);
+void createLayer(Layer *layer, int numberNeurons, int numberWeights, Data *data);
 
-void initialiseNeuron(Neuron *neuron, int nbrWeights);
+void initialiseNeuron(Neuron *neuron, int nbrWeights, Data *data);
 
 void computeInput(VQ *network, double input1, double input2);
 
@@ -70,15 +72,19 @@ void computeOutput(VQ *network);
 
 void computeVQ(VQ *network, double input1, double input2);
 
-void updateWinning(Neuron *neuron, double input1, double input2);
+void updateWinning(Neuron *neuron, double input1, double input2, int epoch);
 
-void pickWinner(VQ *network, double input1, double input2);
+void pushLoser(Neuron *neuron, double input1, double input2, int epoch);
+
+void pickWinner(VQ *network, double input1, double input2, int epoch);
 
 void train(VQ *network, Data *data);
 
 void printClusterCenters(VQ *network);
 
 void printDebug(VQ *network);
+
+double learningRate(int epoch);
 
 
 int main(void) {
@@ -103,9 +109,13 @@ int main(void) {
 
   parseFile(path,&data);
 
-  createVQ(&network, NBR_INPUT_NEURONS, data.NbrCluster);
+  createVQ(&network, NBR_INPUT_NEURONS, data.NbrCluster, &data);
+
+  printDebug(&network);
 
   train(&network,&data);
+
+  //printClusterCenters(&network);
 
   printDebug(&network);
 
@@ -122,6 +132,9 @@ void parseFile(char *path, Data *data) {
   if (file) {
     fgets(buff, size, (FILE *) file);
     data->NbrCluster = atoi(buff);
+    if (data->NbrCluster == 0){
+      return;
+    }
     while (fgets(buff, size, (FILE *) file) != NULL) {
       parseLine(buff, &(data->Values[i]));
       i++;
@@ -148,38 +161,38 @@ void parseLine(char *line, Value *data) {
   data->Input2 = strtod(token[1], NULL);
 }
 
-void createVQ(VQ *network, int neuronsInput, int neuronsOutput) {
-  createInputLayer(network, neuronsInput);
-  createOutputLayer(network, neuronsOutput);
+void createVQ(VQ *network, int neuronsInput, int neuronsOutput, Data *data) {
+  createInputLayer(network, neuronsInput, data);
+  createOutputLayer(network, neuronsOutput, data);
 }
 
-void createInputLayer(VQ *network, int numberNeurons) {
-  createLayer(&network->Input, numberNeurons, 0);
+void createInputLayer(VQ *network, int numberNeurons, Data *data) {
+  createLayer(&network->Input, numberNeurons, 0, data);
 }
 
-void createOutputLayer(VQ *network, int numberNeurons) {
-  createLayer(&network->Output, numberNeurons, 2);
+void createOutputLayer(VQ *network, int numberNeurons, Data *data) {
+  createLayer(&network->Output, numberNeurons, 2, data);
 }
 
-void createLayer(Layer *layer, int numberNeurons, int numberWeights) {
+void createLayer(Layer *layer, int numberNeurons, int numberWeights, Data *data) {
   layer->Neurons = (Neuron *) malloc(sizeof(Neuron) * numberNeurons);
   layer->size = numberNeurons;
   layer->Previous = NULL;
   layer->Next = NULL;
   for (int i = 0; i < numberNeurons; ++i) {
-    initialiseNeuron(&(layer->Neurons[i]), numberWeights);
+    initialiseNeuron(&(layer->Neurons[i]), numberWeights, data);
   }
 }
 
-void initialiseNeuron(Neuron *neuron, int nbrWeights) {
-  int i = 0;
+void initialiseNeuron(Neuron *neuron, int nbrWeights, Data *data) {
+  int index;
   neuron->Output = 0;
   neuron->Delta = 0;
   neuron->Weights = (double *) malloc(sizeof(double) * nbrWeights);
   neuron->Update = (double *) calloc(nbrWeights, sizeof(double));
-  for (i = 0; i < nbrWeights; ++i) {
-    neuron->Weights[i] = WEIGHT_MAX * ((double) rand() / (double) RAND_MAX - 0.5);
-  }
+  index =  (int)floor((data->size+1)*(double)rand()/RAND_MAX);
+  neuron->Weights[0] = data->Values[index].Input1;
+  neuron->Weights[1] = data->Values[index].Input2;
 }
 
 void computeInput(VQ *network, double input1, double input2){
@@ -202,34 +215,46 @@ void computeVQ(VQ *network, double input1, double input2){
   computeOutput(network);
 }
 
-void updateWinning(Neuron *neuron, double input1, double input2){
-  neuron->Update[0] = LEARNING_RATE * (input1 - neuron->Weights[0]);
-  neuron->Update[1] = LEARNING_RATE * (input2 - neuron->Weights[1]);
+void updateWinning(Neuron *neuron, double input1, double input2, int epoch) {
+  neuron->Update[0] = learningRate(epoch) * (input1 - neuron->Weights[0]);
+  neuron->Update[1] = learningRate(epoch) * (input2 - neuron->Weights[1]);
   neuron->Weights[0] = neuron->Weights[0] + neuron->Update[0];
   neuron->Weights[1] = neuron->Weights[1] + neuron->Update[1];
 }
 
-void pickWinner(VQ *network, double input1, double input2){
+void pushLoser(Neuron *neuron, double input1, double input2, int epoch) {
+  neuron->Update[0] = 0.00001 * (input1 - neuron->Weights[0]);
+  neuron->Update[1] = 0.00001 * (input2 - neuron->Weights[1]);
+  neuron->Weights[0] = neuron->Weights[0] - neuron->Update[0];
+  neuron->Weights[1] = neuron->Weights[1] - neuron->Update[1];
+}
+
+void pickWinner(VQ *network, double input1, double input2, int epoch) {
   double x, y, dist, min = 1000000;
   int index = 0;
 
   for (int i = 0; i < network->Output.size; ++i) {
     x = network->Output.Neurons[i].Weights[0] - input1;
     y = network->Output.Neurons[i].Weights[1] - input2;
-    dist = sqrt(pow(x,2.0) + pow(y,2.0));
+    dist = sqrt(pow(x-y,2.0));
     if (dist < min){
       min = dist;
       index = i;
     }
   }
 
-  updateWinning(&(network->Output.Neurons[index]), input1, input2);
+  updateWinning(&(network->Output.Neurons[index]), input1, input2, epoch);
+
+  for (int i = 0; i < network->Output.size; ++i) {
+    if (i != index)
+      pushLoser(&(network->Output.Neurons[i]), input1, input2, epoch);
+  }
 }
 
 void train(VQ *network, Data *data){
   for (int j = 0; j < 1000000; ++j) {
     for (int i = 0; i < data->size; ++i) {
-      pickWinner(network,data->Values[i].Input1,data->Values[i].Input2);
+      pickWinner(network, data->Values[i].Input1, data->Values[i].Input2, j);
     }
   }
 
@@ -249,7 +274,11 @@ void printDebug(VQ *network){
   for (int i = 0; i < network->Output.size; ++i) {
     printf("[%f, %f]",network->Output.Neurons[i].Weights[0],network->Output.Neurons[i].Weights[1]);
     if (i < network->Output.size -1 )
-      printf(",");
+      printf(", ");
   }
-  printf("]");
+  printf("]\n");
+}
+
+double learningRate(int epoch){
+  return LEARNING_RATE * (1 - (epoch/EPOXH_MAX));
 }
