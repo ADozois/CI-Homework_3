@@ -8,7 +8,7 @@
 #define NBR_INPUT_NEURONS 2
 #define WEIGHT_MAX 0.7
 #define LEARNING_RATE 0.01
-#define EPOXH_MAX 100000
+#define EPOXH_MAX 10000000
 #define LAMBDA 2
 
 
@@ -245,10 +245,6 @@ void pickWinner(VQ *network, double input1, double input2, int epoch) {
 
   updateWinning(&(network->Output.Neurons[index]), input1, input2, epoch);
 
-  for (int i = 0; i < network->Output.size; ++i) {
-    if (i != index)
-      pushLoser(&(network->Output.Neurons[i]), input1, input2, epoch);
-  }
 }
 
 void train(VQ *network, Data *data){
