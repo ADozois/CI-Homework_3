@@ -252,10 +252,10 @@ void pickWinner(VQ *network, double input1, double input2, int epoch) {
 }
 
 void train(VQ *network, Data *data){
+  int index;
   for (int j = 0; j < 1000000; ++j) {
-    for (int i = 0; i < data->size; ++i) {
-      pickWinner(network, data->Values[i].Input1, data->Values[i].Input2, j);
-    }
+    index =  (int)floor((data->size+1)*(double)rand()/RAND_MAX);
+    pickWinner(network, data->Values[index].Input1, data->Values[index].Input2, j);
   }
 
 }
