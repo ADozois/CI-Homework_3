@@ -86,6 +86,10 @@ void printDebug(VQ *network);
 
 double learningRate(int epoch);
 
+void pickWinnerNeuralGas(VQ *network, double input1, double input2, int epoch);
+
+void updateWinningNeuralGas(Neuron *neuron, double input1, double input2, int epoch, double* distTab);
+
 
 int main(void) {
   char *path = "/home/gemini/TUM/CI/CI-Homework_3/Problem 1/testInput21B.txt";
@@ -252,7 +256,7 @@ void pickWinner(VQ *network, double input1, double input2, int epoch) {
 }
 
 void train(VQ *network, Data *data){
-  for (int j = 0; j < 1000000; ++j) {
+  for (int j = 0; j < EPOXH_MAX; ++j) {
     for (int i = 0; i < data->size; ++i) {
       pickWinner(network, data->Values[i].Input1, data->Values[i].Input2, j);
     }
@@ -282,3 +286,24 @@ void printDebug(VQ *network){
 double learningRate(int epoch){
   return LEARNING_RATE * (1 - (epoch/EPOXH_MAX));
 }
+
+void pickWinnerNeuralGas(VQ *network, double input1, double input2, int epoch){
+  double x, y, min = 1000000;
+  int index = 0;
+  double * distTab = NULL;
+  int *indexRank = NULL;
+
+  distTab = (double*) calloc(network->Output.size, sizeof(double));
+  indexRank = (int*) calloc(network->Output.size, sizeof(int));
+
+
+  for (int i = 0; i < network->Output.size; ++i) {
+    x = network->Output.Neurons[i].Weights[0] - input1;
+    y = network->Output.Neurons[i].Weights[1] - input2;
+    distTab[i] = sqrt(pow(x-y,2.0));
+  }
+
+  updateWinning(&(network->Output.Neurons[index]), input1, input2, epoch);
+}
+
+void updateWinningNeuralGas(Neuron *neuron, double input1, double input2, int epoch, double* distTab){}
