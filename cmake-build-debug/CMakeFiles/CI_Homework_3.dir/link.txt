@@ -1,1 +1,1 @@
-/usr/bin/cc   -Wall -DNDEBUG -static -std=c99 -pipe -g   CMakeFiles/CI_Homework_3.dir/Problem_1/Problem_1.c.o  -o CI_Homework_3 -lm 
+/usr/bin/cc   -Wall -DNDEBUG -static -std=c99 -pipe -g   CMakeFiles/CI_Homework_3.dir/Problem_3/Problem_3.c.o  -o CI_Homework_3 -lm 
