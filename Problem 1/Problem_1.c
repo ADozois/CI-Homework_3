@@ -35,7 +35,7 @@ struct Data {
   int NbrCluster;
   double Max;
   double Min;
-  Value Values[100];
+  Value Values[1000];
 };
 
 struct VQ {
