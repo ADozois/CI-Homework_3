@@ -77,7 +77,7 @@ int getRadius(int epoch, double sigma, double lambda);
 
 double learningRate(int epoch);
 
-double theta(int epoch, int radius, int dist);
+double theta(int epoch, int radius, double dist);
 
 void train(SOM *network, Data *data);
 
@@ -86,6 +86,9 @@ void printPos(SOM *network);
 void printRoute(SOM *network);
 
 void printDebug(SOM *network);
+
+double getDistanceBMU(double weight_1, double weight_2, double pos_1, double pos_2);
+
 
 int main(void) {
   char *path = "/home/gemini/TUM/CI/CI-Homework_3/Problem 3/testInput23B.txt";
@@ -173,7 +176,7 @@ void findMaxMin(Data *data) {
 
 void createSOM(SOM *network, Data *data) {
   int numberNeurons;
-  numberNeurons = data->size ;//+ (int) ceil(data->size * POUR_TO_ADD);
+  numberNeurons = data->size + (int) ceil(data->size * POUR_TO_ADD);
   network->size = numberNeurons;
   createLayer(&(network->layer), numberNeurons, NBR_WEIGHTS, data);
 }
@@ -250,8 +253,7 @@ void updateWeights(SOM *network, int index, City city, int epoch) {
   radius = getRadius(epoch, sigma_o, lambda);
   learning_rate = learningRate(epoch);
 
-  for (int i = -radius; i < radius; ++i) {
-    influence = theta(epoch, radius, index + i);
+  for (int i = -radius; i < radius + 1; ++i) {
     if (index + i < 0) {
       pos = network->size + index + i;
     } else if (index + i >= network->size) {
@@ -259,6 +261,7 @@ void updateWeights(SOM *network, int index, City city, int epoch) {
     } else {
       pos = index + i;
     }
+    influence = theta(epoch, radius, getDistanceBMU(network->layer.Neurons[index].Weights[0],network->layer.Neurons[index].Weights[1],network->layer.Neurons[pos].Weights[0],network->layer.Neurons[pos].Weights[1]));
     network->layer.Neurons[pos].Update[0] =
         learning_rate * influence * (city.Input1 - network->layer.Neurons[pos].Weights[0]);
     network->layer.Neurons[pos].Update[1] =
@@ -287,7 +290,7 @@ double learningRate(int epoch) {
   return LEARNING_RATE * exp((-epoch) / EPOCH_MAX);
 }
 
-double theta(int epoch, int radius, int dist) {
+double theta(int epoch, int radius, double dist) {
   return exp((-pow(dist, 2.02)) / (2 * pow(radius, 2.0)));
 }
 
@@ -297,7 +300,7 @@ void train(SOM *network, Data *data) {
     for (int j = 0; j < data->size; ++j) {
       index = bestMatchingUnit(network, data->cities[j]);
       if (network->layer.Neurons[index].Registred == 0 || network->layer.Neurons[index].CityId == data->cities[j].Id){
-        updateWeights(network, index, data->cities[j], i);
+        updateWeights(network, index, data->cities[j], i+1);
         network->layer.Neurons[index].CityId = data->cities[j].Id;
         network->layer.Neurons[index].Registred = 1;
       }
@@ -326,4 +329,15 @@ void printDebug(SOM *network){
     }
   }
   printf("]\n");
+}
+
+double getDistanceBMU(double weight_1, double weight_2, double pos_1, double pos_2) {
+  double dist, diff_1, diff_2;
+
+  diff_1 = (weight_1 - pos_1);
+  diff_2 = (weight_2 - pos_2);
+
+  dist = sqrt(pow(diff_1, 2.0) + pow(diff_2, 2.0));
+
+  return dist;
 }
