@@ -63,16 +63,42 @@ void createLayer(Layer *layer, int numberNeurons, int numberWeights, Data *data)
 
 void initialiseNeuron(Neuron *neuron, Neuron *next, Neuron *prev, int nbrWeights, Data *data);
 
+int bestMatchingUnit(SOM *network, City city);
+
+double getDistance(double weight_1, double weight_2, int pos_1, int pos_2);
+
+void updateWeights(SOM *network, int index, City city, int epoch);
+
+double getSigma_o(SOM *network);
+
+double getLambda(int epoch, double sigma);
+
+int getRadius(int epoch, double sigma, double lambda);
+
+double learningRate(int epoch);
+
+double theta(int epoch, int radius, int dist);
+
+void train(SOM *network, Data *data);
+
+void printPos(SOM *network);
+
 int main(void) {
-  char *path = "/home/gemini/TUM/CI/CI-Homework_3/Problem 3/testInput23A.txt";
+  char *path = "/home/gemini/TUM/CI/CI-Homework_3/Problem 3/testInput23B.txt";
   char buff[100];
   int i = 0, flag = 0;
   Data data;
   SOM network;
 
+  //TODO: Implement timer, check in the homework page!!!
+
   parseFile(path, &data);
 
   createSOM(&network, &data);
+
+  train(&network, &data);
+
+  printPos(&network);
 
   return EXIT_SUCCESS;
 }
@@ -171,4 +197,103 @@ void initialiseNeuron(Neuron *neuron, Neuron *next, Neuron *prev, int nbrWeights
   neuron->Weights[1] = rand() % (data->Max_2 + 1 - data->Min_2) + data->Min_2;
   neuron->CityId = 0;
   neuron->Registred = 0;
+}
+
+int bestMatchingUnit(SOM *network, City city) {
+  int index;
+  double min_dist, tmp_dist;
+
+  min_dist =
+      getDistance(network->layer.Neurons[0].Weights[0], network->layer.Neurons[0].Weights[1], city.Input1, city.Input2);
+  index = 0;
+
+  for (int i = 1; i < network->size; ++i) {
+    tmp_dist = getDistance(network->layer.Neurons[i].Weights[0],
+                           network->layer.Neurons[i].Weights[1],
+                           city.Input1,
+                           city.Input2);
+    if (tmp_dist < min_dist) {
+      min_dist = tmp_dist;
+      index = i;
+    }
+  }
+
+  return index;
+}
+
+double getDistance(double weight_1, double weight_2, int pos_1, int pos_2) {
+  double dist, diff_1, diff_2;
+
+  diff_1 = (weight_1 - (double) pos_1);
+  diff_2 = (weight_2 - (double) pos_2);
+
+  dist = sqrt(pow(diff_1, 2.0) + pow(diff_2, 2.0));
+
+  return dist;
+}
+
+void updateWeights(SOM *network, int index, City city, int epoch) {
+  int radius, pos;
+  double learning_rate, influence;
+  double sigma_o = getSigma_o(network);
+  double lambda = getLambda(epoch, sigma_o);
+
+  radius = getRadius(epoch, sigma_o, lambda);
+  learning_rate = learningRate(epoch);
+
+  for (int i = -radius; i < radius; ++i) {
+    influence = theta(epoch, radius, index + i);
+    if (index + i < 0) {
+      pos = network->size + index + i;
+    } else if (index + i >= network->size) {
+      pos = index + i - network->size;
+    } else {
+      pos = index + i;
+    }
+    network->layer.Neurons[pos].Update[0] =
+        learning_rate * influence * (city.Input1 - network->layer.Neurons[pos].Weights[0]);
+    network->layer.Neurons[pos].Update[1] =
+        learning_rate * influence * (city.Input1 - network->layer.Neurons[pos].Weights[1]);
+    network->layer.Neurons[pos].Weights[0] =
+        network->layer.Neurons[pos].Weights[0] + network->layer.Neurons[pos].Update[0];
+    network->layer.Neurons[pos].Weights[1] =
+        network->layer.Neurons[pos].Weights[1] + network->layer.Neurons[pos].Update[1];
+  }
+
+}
+
+double getSigma_o(SOM *network) {
+  return (double) network->size / 2.0;
+}
+
+double getLambda(int epoch, double sigma) {
+  return (epoch) / (log(sigma));
+}
+
+int getRadius(int epoch, double sigma, double lambda) {
+  return (int) ceil(sigma * exp((-epoch) / lambda));
+}
+
+double learningRate(int epoch) {
+  return LEARNING_RATE * exp((-epoch) / EPOCH_MAX);
+}
+
+double theta(int epoch, int radius, int dist) {
+  return exp((-pow(dist, 2.02)) / (2 * pow(radius, 2.0)));
+}
+
+void train(SOM *network, Data *data) {
+  int index;
+  for (int i = 0; i < EPOCH_MAX; ++i) {
+    for (int j = 0; j < data->size; ++j) {
+      index = bestMatchingUnit(network, data->cities[j]);
+      updateWeights(network, index, data->cities[j], i);
+    }
+  }
+}
+
+void printPos(SOM *network) {
+  for (int i = 0; i < network->size; ++i) {
+    printf("%f, %f\n", network->layer.Neurons[i].Weights[0], network->layer.Neurons[i].Weights[1]);
+  }
 }
