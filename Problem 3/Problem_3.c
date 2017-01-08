@@ -8,7 +8,7 @@
 #define POUR_TO_ADD 0.1
 #define NBR_WEIGHTS 2
 #define LEARNING_RATE 0.01
-#define EPOCH_MAX 1000000
+#define EPOCH_MAX 5000000
 #define LAMBDA 2
 
 typedef struct Data Data;
@@ -173,7 +173,7 @@ void findMaxMin(Data *data) {
 
 void createSOM(SOM *network, Data *data) {
   int numberNeurons;
-  numberNeurons = data->size + (int) ceil(data->size * POUR_TO_ADD);
+  numberNeurons = data->size ;//+ (int) ceil(data->size * POUR_TO_ADD);
   network->size = numberNeurons;
   createLayer(&(network->layer), numberNeurons, NBR_WEIGHTS, data);
 }
