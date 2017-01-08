@@ -8,7 +8,7 @@
 #define POUR_TO_ADD 0.1
 #define NBR_WEIGHTS 2
 #define LEARNING_RATE 0.01
-#define EPOCH_MAX 100000
+#define EPOCH_MAX 1000000
 #define LAMBDA 2
 
 typedef struct Data Data;
@@ -83,6 +83,10 @@ void train(SOM *network, Data *data);
 
 void printPos(SOM *network);
 
+void printRoute(SOM *network);
+
+void printDebug(SOM *network);
+
 int main(void) {
   char *path = "/home/gemini/TUM/CI/CI-Homework_3/Problem 3/testInput23B.txt";
   char buff[100];
@@ -90,15 +94,20 @@ int main(void) {
   Data data;
   SOM network;
 
+  srand((unsigned) time(NULL)); //Seed initialisation
+
+
   //TODO: Implement timer, check in the homework page!!!
 
   parseFile(path, &data);
 
   createSOM(&network, &data);
 
+  printDebug(&network);
+
   train(&network, &data);
 
-  printPos(&network);
+  printDebug(&network);
 
   return EXIT_SUCCESS;
 }
@@ -253,7 +262,7 @@ void updateWeights(SOM *network, int index, City city, int epoch) {
     network->layer.Neurons[pos].Update[0] =
         learning_rate * influence * (city.Input1 - network->layer.Neurons[pos].Weights[0]);
     network->layer.Neurons[pos].Update[1] =
-        learning_rate * influence * (city.Input1 - network->layer.Neurons[pos].Weights[1]);
+        learning_rate * influence * (city.Input2 - network->layer.Neurons[pos].Weights[1]);
     network->layer.Neurons[pos].Weights[0] =
         network->layer.Neurons[pos].Weights[0] + network->layer.Neurons[pos].Update[0];
     network->layer.Neurons[pos].Weights[1] =
@@ -287,7 +296,11 @@ void train(SOM *network, Data *data) {
   for (int i = 0; i < EPOCH_MAX; ++i) {
     for (int j = 0; j < data->size; ++j) {
       index = bestMatchingUnit(network, data->cities[j]);
-      updateWeights(network, index, data->cities[j], i);
+      if (network->layer.Neurons[index].Registred == 0 || network->layer.Neurons[index].CityId == data->cities[j].Id){
+        updateWeights(network, index, data->cities[j], i);
+        network->layer.Neurons->CityId = data->cities[j].Id;
+        network->layer.Neurons->Registred = 1;
+      }
     }
   }
 }
@@ -296,4 +309,21 @@ void printPos(SOM *network) {
   for (int i = 0; i < network->size; ++i) {
     printf("%f, %f\n", network->layer.Neurons[i].Weights[0], network->layer.Neurons[i].Weights[1]);
   }
+}
+
+void printRoute(SOM *network){
+  for (int i = 0; i < network->size; ++i) {
+    printf("%d\n",network->layer.Neurons[i].CityId);
+  }
+}
+
+void printDebug(SOM *network){
+  printf("[");
+  for (int i = 0; i < network->size; ++i) {
+    printf("[%d, %f, %f]", network->layer.Neurons[i].CityId, network->layer.Neurons[i].Weights[0],network->layer.Neurons[i].Weights[1]);
+    if (i != network->size - 1){
+      printf(", ");
+    }
+  }
+  printf("]\n");
 }
