@@ -298,8 +298,8 @@ void train(SOM *network, Data *data) {
       index = bestMatchingUnit(network, data->cities[j]);
       if (network->layer.Neurons[index].Registred == 0 || network->layer.Neurons[index].CityId == data->cities[j].Id){
         updateWeights(network, index, data->cities[j], i);
-        network->layer.Neurons->CityId = data->cities[j].Id;
-        network->layer.Neurons->Registred = 1;
+        network->layer.Neurons[index].CityId = data->cities[j].Id;
+        network->layer.Neurons[index].Registred = 1;
       }
     }
   }
