@@ -8,7 +8,7 @@
 #define POUR_TO_ADD 0.1
 #define NBR_WEIGHTS 2
 #define LEARNING_RATE 0.01
-#define EPOCH_MAX 5000000
+#define EPOCH_MAX 500000
 #define LAMBDA 2
 
 typedef struct Data Data;
@@ -26,6 +26,7 @@ struct City {
   int Id;
   int Input1;
   int Input2;
+  int Neuron;
 };
 
 struct Data {
@@ -89,9 +90,10 @@ void printDebug(SOM *network);
 
 double getDistanceBMU(double weight_1, double weight_2, double pos_1, double pos_2);
 
+void printCity(Data *data, SOM *network);
 
 int main(void) {
-  char *path = "/home/gemini/TUM/CI/CI-Homework_3/Problem 3/testInput23B.txt";
+  char *path = "/home/gemini/TUM/CI/CI-Homework_3/Problem 3/testInput23C.txt";
   char buff[100];
   int i = 0, flag = 0;
   Data data;
@@ -102,15 +104,24 @@ int main(void) {
 
   //TODO: Implement timer, check in the homework page!!!
 
-  parseFile(path, &data);
+  while(scanf("%s",buff) == 1) {
+      parseLine(buff, &(data.cities[i]));
+      i++;
+
+  }
+  data.size = i;
+
+  //parseFile(path, &data);
 
   createSOM(&network, &data);
 
-  printDebug(&network);
+  //printDebug(&network);
 
   train(&network, &data);
 
-  printDebug(&network);
+  //printDebug(&network);
+
+  printCity(&data,&network);
 
   return EXIT_SUCCESS;
 }
@@ -299,11 +310,10 @@ void train(SOM *network, Data *data) {
   for (int i = 0; i < EPOCH_MAX; ++i) {
     for (int j = 0; j < data->size; ++j) {
       index = bestMatchingUnit(network, data->cities[j]);
-      if (network->layer.Neurons[index].Registred == 0 || network->layer.Neurons[index].CityId == data->cities[j].Id){
-        updateWeights(network, index, data->cities[j], i+1);
-        network->layer.Neurons[index].CityId = data->cities[j].Id;
-        network->layer.Neurons[index].Registred = 1;
-      }
+      data->cities[j].Neuron = index;
+      updateWeights(network, index, data->cities[j], i + 1);
+      network->layer.Neurons[index].CityId = data->cities[j].Id;
+      network->layer.Neurons[index].Registred = 1;
     }
   }
 }
@@ -340,4 +350,14 @@ double getDistanceBMU(double weight_1, double weight_2, double pos_1, double pos
   dist = sqrt(pow(diff_1, 2.0) + pow(diff_2, 2.0));
 
   return dist;
+}
+
+void printCity(Data *data, SOM *network) {
+  for (int i = 0; i < network->size; ++i) {
+    for (int j = 0; j < data->size; ++j) {
+      if (data->cities[j].Neuron == i){
+        printf("%d\n",data->cities[j].Id);
+      }
+    }
+  }
 }

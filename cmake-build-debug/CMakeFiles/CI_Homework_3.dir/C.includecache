@@ -6,7 +6,7 @@
 
 #IncludeRegexTransform: 
 
-/home/gemini/TUM/CI/CI-Homework_3/Problem 3/Problem_3.c
+/home/gemini/TUM/CI/CI-Homework_3/Problem 1/Problem_1.c
 stdio.h
 -
 stdlib.h
