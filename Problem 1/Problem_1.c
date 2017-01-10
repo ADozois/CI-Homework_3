@@ -96,16 +96,7 @@ int main(void) {
 
   srand((unsigned) time(NULL)); //Seed initialisation
 
-  /*while(scanf("%s",buff) == 1) {
-    if (flag == 0) {
-      data.NbrCluster = atoi(buff);
-      flag = 1;
-    } else{
-      parseLine(buff, &(data.Values[i]));
-      ++i;
-    }
-  }
-  data.size = i;*/
+   
 
   parseFile(path,&data);
 
