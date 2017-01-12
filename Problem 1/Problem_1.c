@@ -86,6 +86,10 @@ void printDebug(VQ *network);
 
 double learningRate(int epoch);
 
+void mean(Data *data, double *mean);
+
+void sd(Data *data, double *sd, double *mean);
+
 
 int main(void) {
   char *path = "/home/gemini/TUM/CI/CI-Homework_3/Problem 1/testInput21B.txt";
@@ -93,10 +97,9 @@ int main(void) {
   int i = 0, flag = 0;
   Data data;
   VQ network;
+  double mean_[2], sd_[2];
 
   srand((unsigned) time(NULL)); //Seed initialisation
-
-   
 
   parseFile(path,&data);
 
@@ -272,4 +275,25 @@ void printDebug(VQ *network){
 
 double learningRate(int epoch){
   return LEARNING_RATE * (1 - (epoch/EPOXH_MAX));
+}
+
+void mean(Data *data, double *mean) {
+  double sum[2] = {0,0};
+
+  for (int i = 0; i < data->size; ++i) {
+    sum[0] += data->Values[i].Input1;
+    sum[1] += data->Values[i].Input2;
+  }
+  mean[0] = sum[0]/data->size;
+  mean[1] = sum[1]/data->size;
+}
+
+void sd(Data *data, double *sd, double *mean) {
+  double sum[2] = {0,0};
+  for (int i = 0; i < data->size; ++i) {
+    sum[0] += pow(data->Values[i].Input1 - mean[0],2.0);
+    sum[1] += pow(data->Values[i].Input2 - mean[1],2.0);
+  }
+  sd[0] = sqrt(sum[0]/data->size);
+  sd[1] = sqrt(sum[1]/data->size);
 }
