@@ -8,7 +8,7 @@
 #define NBR_INPUT_NEURONS 2
 #define WEIGHT_MAX 0.7
 #define LEARNING_RATE 0.01
-#define EPOXH_MAX 100000
+#define EPOXH_MAX 1000
 #define LAMBDA 2
 
 
@@ -28,6 +28,7 @@ struct Layer {
 struct Value {
   double Input1;
   double Input2;
+  int cluster;
 };
 
 struct Data {
@@ -90,6 +91,20 @@ void mean(Data *data, double *mean);
 
 void sd(Data *data, double *sd, double *mean);
 
+void iniatiliseWeights(Data *data, VQ *network);
+
+double getDistance(double weight_1, double weight_2, double pos_1, double pos_2);
+
+void kmean(Data *data, VQ *network);
+
+double RandRange(double Min, double Max);
+
+double max(Data *data, int input);
+
+double min(Data *data, int input);
+
+double rand_gauss (void);
+
 
 int main(void) {
   char *path = "/home/gemini/TUM/CI/CI-Homework_3/Problem 1/testInput21B.txt";
@@ -100,6 +115,17 @@ int main(void) {
   double mean_[2], sd_[2];
 
   srand((unsigned) time(NULL)); //Seed initialisation
+
+  /*while(scanf("%s",buff) == 1) {
+    if (flag == 0) {
+      data.NbrCluster = atoi(buff);
+      flag = 1;
+    } else{
+      parseLine(buff, &(data.Values[i]));
+      ++i;
+    }
+  }
+  data.size = i;*/
 
   parseFile(path,&data);
 
@@ -184,9 +210,9 @@ void initialiseNeuron(Neuron *neuron, int nbrWeights, Data *data) {
   neuron->Delta = 0;
   neuron->Weights = (double *) malloc(sizeof(double) * nbrWeights);
   neuron->Update = (double *) calloc(nbrWeights, sizeof(double));
-  index =  (int)floor((data->size+1)*(double)rand()/RAND_MAX);
-  neuron->Weights[0] = data->Values[index].Input1;
-  neuron->Weights[1] = data->Values[index].Input2;
+  //index =  (int)floor((data->size+1)*(double)rand()/RAND_MAX);
+  neuron->Weights[0] = RandRange(min(data,1),max(data,1));
+  neuron->Weights[1] = RandRange(min(data,2),max(data,2));
 }
 
 void computeInput(VQ *network, double input1, double input2){
@@ -239,17 +265,15 @@ void pickWinner(VQ *network, double input1, double input2, int epoch) {
 
   updateWinning(&(network->Output.Neurons[index]), input1, input2, epoch);
 
-  for (int i = 0; i < network->Output.size; ++i) {
+  /*for (int i = 0; i < network->Output.size; ++i) {
     if (i != index)
       pushLoser(&(network->Output.Neurons[i]), input1, input2, epoch);
-  }
+  }*/
 }
 
 void train(VQ *network, Data *data){
-  for (int j = 0; j < 1000000; ++j) {
-    for (int i = 0; i < data->size; ++i) {
-      pickWinner(network, data->Values[i].Input1, data->Values[i].Input2, j);
-    }
+  for (int j = 0; j < EPOXH_MAX; ++j) {
+      kmean(data,network);
   }
 
 }
@@ -296,4 +320,142 @@ void sd(Data *data, double *sd, double *mean) {
   }
   sd[0] = sqrt(sum[0]/data->size);
   sd[1] = sqrt(sum[1]/data->size);
+}
+
+void iniatiliseWeights(Data *data, VQ *network){
+  network->Output.Neurons[0].Weights[0] = data->Values[0].Input1;
+  network->Output.Neurons[0].Weights[1] = data->Values[0].Input2;
+
+  for (int i = 0; i < network->Output.size; ++i) {
+
+  }
+}
+
+double getDistance(double weight_1, double weight_2, double pos_1, double pos_2) {
+  double dist, diff_1, diff_2;
+
+  diff_1 = (weight_1 - pos_1);
+  diff_2 = (weight_2 - pos_2);
+
+  dist = sqrt(pow(diff_1, 2.0) + pow(diff_2, 2.0));
+
+  return dist;
+}
+
+void kmean(Data *data, VQ *network) {
+  double tmp, dist = getDistance(network->Output.Neurons[0].Weights[0],
+                                 network->Output.Neurons[0].Weights[1],
+                                 data->Values[0].Input1,
+                                 data->Values[0].Input2);
+  int index = 0;
+  double sum[network->Output.size];
+  int nbr[network->Output.size];
+
+
+  for (int i = 0; i < data->size; ++i) {
+    for (int j = 0; j < network->Output.size; ++j) {
+      tmp = getDistance(network->Output.Neurons[j].Weights[0],
+                        network->Output.Neurons[j].Weights[1],
+                        data->Values[i].Input1,
+                        data->Values[i].Input2);
+      if (tmp < dist) {
+        dist = tmp;
+        index = j;
+      }
+    }
+    dist = 100000000;
+    data->Values[i].cluster = index;
+  }
+
+  for (int k = 0; k < network->Output.size; ++k) {
+    sum[k] = 0;
+    nbr[k] = 0;
+  }
+
+  for (int l = 0; l < data->size; ++l) {
+    sum[data->Values[l].cluster] += data->Values[l].Input1;
+    nbr[data->Values[l].cluster] += 1;
+  }
+  for (int m = 0; m < network->Output.size; ++m) {
+    network->Output.Neurons[m].Weights[0] = sum[m]/nbr[m];
+  }
+
+  for (int k = 0; k < network->Output.size; ++k) {
+    sum[k] = 0;
+    nbr[k] = 0;
+  }
+
+  for (int l = 0; l < data->size; ++l) {
+    sum[data->Values[l].cluster] += data->Values[l].Input2;
+    nbr[data->Values[l].cluster] += 1;
+  }
+  for (int m = 0; m < network->Output.size; ++m) {
+    network->Output.Neurons[m].Weights[1] = sum[m]/nbr[m];
+  }
+}
+
+double RandRange(double Min, double Max)
+{
+  double diff = Max-Min;
+  return  (((diff+1)/RAND_MAX) * rand() + Min);
+}
+
+double max(Data *data, int input){
+  double tmp, value;
+
+  if (input == 1){
+    value = data->Values[0].Input1;
+  } else{
+    value = data->Values[0].Input2;
+  }
+  for (int i = 0; i < data->size; ++i) {
+    if (input == 1){
+      tmp = data->Values[i].Input1;
+    } else{
+      tmp = data->Values[i].Input2;
+    }
+
+    if(tmp > value){
+      value = tmp;
+    }
+  }
+  return value;
+}
+
+double min(Data *data, int input){
+  double tmp, value;
+
+  if (input == 1){
+    value = data->Values[0].Input1;
+  } else{
+    value = data->Values[0].Input2;
+  }
+  for (int i = 0; i < data->size; ++i) {
+    if (input == 1){
+      tmp = data->Values[i].Input1;
+    } else{
+      tmp = data->Values[i].Input2;
+    }
+
+    if(tmp < value){
+      value = tmp;
+    }
+  }
+  return value;
+}
+
+double rand_gauss (void) {
+  float v1,v2,s;
+
+  do {
+    v1 = 2.0 * ((float) rand()/RAND_MAX) - 1;
+    v2 = 2.0 * ((float) rand()/RAND_MAX) - 1;
+
+    s = v1*v1 + v2*v2;
+  } while ( s >= 1.0 );
+
+  if (s == 0.0)
+    return 0.0;
+  else
+    return (v1*sqrt(-2.0 * log(s) / s));
 }
