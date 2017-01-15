@@ -7,7 +7,7 @@
 
 #define POUR_TO_ADD 0.1
 #define NBR_WEIGHTS 2
-#define LEARNING_RATE 0.01
+#define LEARNING_RATE 0.1
 #define EPOCH_MAX 500000
 #define LAMBDA 2
 
@@ -72,11 +72,13 @@ void updateWeights(SOM *network, int index, City city, int epoch);
 
 double getSigma_o(SOM *network);
 
+double getSigma(SOM *network, int epoch);
+
 double getLambda(int epoch, double sigma);
 
-int getRadius(int epoch, double sigma, double lambda);
+int getRadius(int epoch, SOM *network);
 
-double learningRate(int epoch);
+double learningRate(int epoch, SOM *network);
 
 double theta(int epoch, int radius, double dist);
 
@@ -93,7 +95,7 @@ double getDistanceBMU(double weight_1, double weight_2, double pos_1, double pos
 void printCity(Data *data, SOM *network);
 
 int main(void) {
-  char *path = "/home/gemini/TUM/CI/CI-Homework_3/Problem 3/testInput23C.txt";
+  char *path = "/home/gemini/TUM/CI/CI-Homework_3/Problem 3/testInput23A.txt";
   char buff[100];
   int i = 0, flag = 0;
   Data data;
@@ -235,7 +237,7 @@ int bestMatchingUnit(SOM *network, City city) {
                            network->layer.Neurons[i].Weights[1],
                            city.Input1,
                            city.Input2);
-    if (tmp_dist < min_dist) {
+    if (tmp_dist < min_dist && network->layer.Neurons[i].CityId != city.Id) {
       min_dist = tmp_dist;
       index = i;
     }
@@ -261,8 +263,8 @@ void updateWeights(SOM *network, int index, City city, int epoch) {
   double sigma_o = getSigma_o(network);
   double lambda = getLambda(epoch, sigma_o);
 
-  radius = getRadius(epoch, sigma_o, lambda);
-  learning_rate = learningRate(epoch);
+  radius = getRadius(epoch, network);
+  learning_rate = learningRate(epoch, network);
 
   for (int i = -radius; i < radius + 1; ++i) {
     if (index + i < 0) {
@@ -289,20 +291,25 @@ double getSigma_o(SOM *network) {
   return (double) network->size / 2.0;
 }
 
+double getSigma(SOM *network, int epoch) {
+  double sigmaO = getSigma_o(network);
+  return sigmaO * exp((-epoch)/1000);
+}
+
 double getLambda(int epoch, double sigma) {
-  return (epoch) / (log(sigma));
+  return (1000) / (log(sigma));
 }
 
-int getRadius(int epoch, double sigma, double lambda) {
-  return (int) ceil(sigma * exp((-epoch) / lambda));
+int getRadius(int epoch, SOM *network) {
+  return (int) ceil(getSigma(network,epoch));
 }
 
-double learningRate(int epoch) {
-  return LEARNING_RATE * exp((-epoch) / EPOCH_MAX);
+double learningRate(int epoch, SOM *network) {
+  return LEARNING_RATE * exp((-epoch) / 1000);
 }
 
 double theta(int epoch, int radius, double dist) {
-  return exp((-pow(dist, 2.02)) / (2 * pow(radius, 2.0)));
+  return exp((-pow(dist, 2.0)) / (2 * pow(radius, 2.0)));
 }
 
 void train(SOM *network, Data *data) {
