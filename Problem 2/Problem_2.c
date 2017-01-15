@@ -40,8 +40,12 @@ void training(Hopfeild *network, Data *data);
 
 void printWeights(Hopfeild *network);
 
+void recovery(Hopfeild *network, Data *data);
+
+void printOutput(Hopfeild *network);
+
 int main (void){
-  char *path = "/home/gemini/TUM/CI/CI-Homework_3/Problem 2/testInput22A.txt";
+  char *path = "/home/gemini/TUM/CI/CI-Homework_3/Problem 2/testInput22B.txt";
   Data train, test;
   Hopfeild network;
 
@@ -54,7 +58,14 @@ int main (void){
 
   training(&network,&train);
 
-  printWeights(&network);
+  recovery(&network,&test);
+
+  printImage(&test.Images[0]);
+
+  printf("\n");
+
+  printOutput(&network);
+
 
   return EXIT_SUCCESS;
 }
@@ -69,7 +80,10 @@ void parseFile(char *path, Data *train, Data *test) {
   if (file) {
     while (fgets(buff, size, (FILE *) file) != NULL) {
       if (buff[0] == '-' && buff[1] == '\n'){
-        j++;
+        if (flag == 0)
+          j++;
+        else
+          i++;
       } else if (buff[0] == '-' && buff[1] == '-' && buff[2] == '-' && buff[3] == '\n'){
         flag = 1;
       } else{
@@ -80,6 +94,7 @@ void parseFile(char *path, Data *train, Data *test) {
       }
     }
     train->NbrImage = j +1;
+    test->NbrImage = i + 1;
   } else {
     printf("Can't open file");
   }
@@ -89,7 +104,7 @@ void parseLine(char *line, Image *img) {
 
   for (int j = 0; j < 20; ++j) {
     if (line[j] == '.'){
-      img->Img[j+img->Index] = 0;
+      img->Img[j+img->Index] = -1;
     } else{
       img->Img[j+img->Index] = 1;
     }
@@ -101,7 +116,10 @@ void printImage(Image *img){
   int index = 0;
   for (int j = 0; j < 10; ++j) {
     for (int i = 0; i < 20; ++i) {
-      printf("%d",img->Img[i+index]);
+      if (img->Img[i+index] == 1)
+        printf("%c",'*');
+      else
+        printf("%c",'.');
     }
     printf("\n");
     index += 20;
@@ -127,5 +145,37 @@ void printWeights(Hopfeild *network){
       printf("%d",network->Weights[i][j]);
     }
     printf("\n");
+  }
+}
+
+void recovery(Hopfeild *network, Data *data){
+  for (int iter = 0; iter < 1; ++iter) {
+    for (int pt = 0; pt < data->NbrImage; ++pt) {
+      for (int n1 = 0; n1 < 200; ++n1) {
+        network->Output[n1] = 0;
+        for (int n2 = 0; n2 < 200; ++n2) {
+          network->Output[n1] += network->Weights[n1][n2] * data->Images[pt].Img[n2];
+        }
+        if (network->Output[n1] >= 0){
+          network->Output[n1] = 1;
+        } else{
+          network->Output[n1] = -1;
+        }
+      }
+    }
+  }
+}
+
+void printOutput(Hopfeild *network){
+  int index = 0;
+  for (int j = 0; j < 10; ++j) {
+    for (int i = 0; i < 20; ++i) {
+      if (network->Output[i+index] == 1)
+        printf("%c",'.');
+      else
+        printf("%c",'*');
+    }
+    printf("\n");
+    index += 20;
   }
 }
