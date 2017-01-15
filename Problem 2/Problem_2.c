@@ -20,7 +20,7 @@ struct Image{
 };
 
 struct Data{
-  Image Img[10];
+  Image Images[10];
   int NbrImage;
 };
 
@@ -36,18 +36,25 @@ void parseLine(char *line, Image *img);
 
 void printImage(Image *img);
 
+void training(Hopfeild *network, Data *data);
+
+void printWeights(Hopfeild *network);
+
 int main (void){
   char *path = "/home/gemini/TUM/CI/CI-Homework_3/Problem 2/testInput22A.txt";
   Data train, test;
+  Hopfeild network;
 
   for (int i = 0; i < 10; ++i) {
-    train.Img[i].Index = 0;
-    test.Img[i].Index = 0;
+    train.Images[i].Index = 0;
+    test.Images[i].Index = 0;
   }
 
   parseFile(path,&train,&test);
 
-  printImage(&train.Img[0]);
+  training(&network,&train);
+
+  printWeights(&network);
 
   return EXIT_SUCCESS;
 }
@@ -67,9 +74,9 @@ void parseFile(char *path, Data *train, Data *test) {
         flag = 1;
       } else{
         if (flag == 0)
-          parseLine(buff, &(train->Img[j]));
+          parseLine(buff, &(train->Images[j]));
         else
-          parseLine(buff, &(test->Img[i]));
+          parseLine(buff, &(test->Images[i]));
       }
     }
     train->NbrImage = j +1;
@@ -98,5 +105,27 @@ void printImage(Image *img){
     }
     printf("\n");
     index += 20;
+  }
+}
+
+void training(Hopfeild *network, Data *data){
+  for (int pt = 0; pt < data->NbrImage; ++pt) {
+    for (int i = 0; i < 200; ++i) {
+      for (int j = 0; j < 200; ++j) {
+        if (i == j)
+          network->Weights[i][j] = 0;
+        else
+          network->Weights[i][j] = data->Images[pt].Img[i] * data->Images[pt].Img[j];
+      }
+    }
+  }
+}
+
+void printWeights(Hopfeild *network){
+  for (int i = 0; i < 200; ++i) {
+    for (int j = 0; j < 200; ++j) {
+      printf("%d",network->Weights[i][j]);
+    }
+    printf("\n");
   }
 }
