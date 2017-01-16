@@ -59,7 +59,7 @@ int main (void){
     test.Images[i].Index = 0;
   }
 
-  /*while(scanf("%s",buff) == 1) {
+  while(scanf("%s",buff) == 1) {
     if (strcmp(buff, "-") == 0){
       if (flag == 0) {
         j++;
@@ -76,9 +76,9 @@ int main (void){
     }
   }
   train.NbrImage = j +1;
-  test.NbrImage = i + 1;*/
+  test.NbrImage = i + 1;
 
-  parseFile(path,&train,&test);
+  //parseFile(path,&train,&test);
 
   training(&network,&train);
 
