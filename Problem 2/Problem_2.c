@@ -59,15 +59,14 @@ int main (void){
     test.Images[i].Index = 0;
   }
 
-  while(scanf("%s",buff) == 1) {
-    if (buff[0] == '-' && buff[1] == '\n'){
+  /*while(scanf("%s",buff) == 1) {
+    if (strcmp(buff, "-") == 0){
       if (flag == 0) {
-        printf("tetetetete");
         j++;
       }
       else
         i++;
-    } else if (buff[0] == '-' && buff[1] == '-' && buff[2] == '-' && buff[3] == '\n'){
+    } else if (strcmp(buff, "---") == 0){
       flag = 1;
     } else{
       if (flag == 0)
@@ -77,9 +76,9 @@ int main (void){
     }
   }
   train.NbrImage = j +1;
-  test.NbrImage = i + 1;
+  test.NbrImage = i + 1;*/
 
-  //parseFile(path,&train,&test);
+  parseFile(path,&train,&test);
 
   training(&network,&train);
 
@@ -91,6 +90,7 @@ int main (void){
 
   printOutput(&network, &test);
 
+  //printImage(&network.Output[3]);
 
   return EXIT_SUCCESS;
 }
@@ -174,7 +174,7 @@ void printWeights(Hopfeild *network){
 }
 
 void recovery(Hopfeild *network, Data *data){
-  for (int iter = 0; iter < EPOCH_MAX; ++iter) {
+  for (int iter = 0; iter < 1; ++iter) {
     for (int pt = 0; pt < data->NbrImage; ++pt) {
       for (int n1 = 0; n1 < 200; ++n1) {
         network->Output[pt][n1] = 0;
@@ -192,8 +192,9 @@ void recovery(Hopfeild *network, Data *data){
 }
 
 void printOutput(Hopfeild *network, Data *data) {
-  int index = 0;
+  int index;
   for (int pt = 0; pt < data->NbrImage; ++pt) {
+    index = 0;
     for (int j = 0; j < 10; ++j) {
       for (int i = 0; i < 20; ++i) {
         if (network->Output[pt][i+index] == 1)
@@ -204,7 +205,7 @@ void printOutput(Hopfeild *network, Data *data) {
       printf("\n");
       index += 20;
     }
-    if (data->NbrImage > 1)
+    if (data->NbrImage > 1 && pt != data->NbrImage-1)
       printf("-\n");
   }
 }
