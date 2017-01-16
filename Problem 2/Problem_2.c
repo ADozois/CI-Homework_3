@@ -7,7 +7,7 @@
 
 #define NBR_WEIGHTS 2
 #define LEARNING_RATE 0.1
-#define EPOCH_MAX 500000
+#define EPOCH_MAX 100
 #define LAMBDA 2
 
 typedef struct Image Image;
@@ -27,7 +27,7 @@ struct Data{
 struct Hopfeild {
   int Input[200];
   int Weights[200][200];
-  int Output [200];
+  int Output [10][200];
 };
 
 void parseFile(char *file, Data *train, Data *test);
@@ -42,11 +42,16 @@ void printWeights(Hopfeild *network);
 
 void recovery(Hopfeild *network, Data *data);
 
-void printOutput(Hopfeild *network);
+void printOutput(Hopfeild *network, Data *data);
+
+int converge(int *output, Data *data);
 
 int main (void){
   char *path = "/home/gemini/TUM/CI/CI-Homework_3/Problem 2/testInput22B.txt";
   Data train, test;
+  int flag = 0;
+  int j = 0, i = 0;
+  char buff[100];
   Hopfeild network;
 
   for (int i = 0; i < 10; ++i) {
@@ -54,17 +59,37 @@ int main (void){
     test.Images[i].Index = 0;
   }
 
-  parseFile(path,&train,&test);
+  while(scanf("%s",buff) == 1) {
+    if (buff[0] == '-' && buff[1] == '\n'){
+      if (flag == 0) {
+        printf("tetetetete");
+        j++;
+      }
+      else
+        i++;
+    } else if (buff[0] == '-' && buff[1] == '-' && buff[2] == '-' && buff[3] == '\n'){
+      flag = 1;
+    } else{
+      if (flag == 0)
+        parseLine(buff, &(train.Images[j]));
+      else
+        parseLine(buff, &(test.Images[i]));
+    }
+  }
+  train.NbrImage = j +1;
+  test.NbrImage = i + 1;
+
+  //parseFile(path,&train,&test);
 
   training(&network,&train);
 
   recovery(&network,&test);
 
-  printImage(&test.Images[0]);
+  //printImage(&train.Images[0]);
 
-  printf("\n");
+  //printf("\n");
 
-  printOutput(&network);
+  printOutput(&network, &test);
 
 
   return EXIT_SUCCESS;
@@ -133,7 +158,7 @@ void training(Hopfeild *network, Data *data){
         if (i == j)
           network->Weights[i][j] = 0;
         else
-          network->Weights[i][j] = data->Images[pt].Img[i] * data->Images[pt].Img[j];
+          network->Weights[i][j] += data->Images[pt].Img[i] * data->Images[pt].Img[j];
       }
     }
   }
@@ -149,33 +174,37 @@ void printWeights(Hopfeild *network){
 }
 
 void recovery(Hopfeild *network, Data *data){
-  for (int iter = 0; iter < 1; ++iter) {
+  for (int iter = 0; iter < EPOCH_MAX; ++iter) {
     for (int pt = 0; pt < data->NbrImage; ++pt) {
       for (int n1 = 0; n1 < 200; ++n1) {
-        network->Output[n1] = 0;
+        network->Output[pt][n1] = 0;
         for (int n2 = 0; n2 < 200; ++n2) {
-          network->Output[n1] += network->Weights[n1][n2] * data->Images[pt].Img[n2];
+          network->Output[pt][n1] += network->Weights[n1][n2] * data->Images[pt].Img[n2];
         }
-        if (network->Output[n1] >= 0){
-          network->Output[n1] = 1;
+        if (network->Output[pt][n1] >= 0){
+          network->Output[pt][n1] = 1;
         } else{
-          network->Output[n1] = -1;
+          network->Output[pt][n1] = -1;
         }
       }
     }
   }
 }
 
-void printOutput(Hopfeild *network){
+void printOutput(Hopfeild *network, Data *data) {
   int index = 0;
-  for (int j = 0; j < 10; ++j) {
-    for (int i = 0; i < 20; ++i) {
-      if (network->Output[i+index] == 1)
-        printf("%c",'.');
-      else
-        printf("%c",'*');
+  for (int pt = 0; pt < data->NbrImage; ++pt) {
+    for (int j = 0; j < 10; ++j) {
+      for (int i = 0; i < 20; ++i) {
+        if (network->Output[pt][i+index] == 1)
+          printf("%c",'*');
+        else
+          printf("%c",'.');
+      }
+      printf("\n");
+      index += 20;
     }
-    printf("\n");
-    index += 20;
+    if (data->NbrImage > 1)
+      printf("-\n");
   }
 }
