@@ -237,7 +237,7 @@ int bestMatchingUnit(SOM *network, City city) {
                            network->layer.Neurons[i].Weights[1],
                            city.Input1,
                            city.Input2);
-    if (tmp_dist < min_dist && network->layer.Neurons[i].CityId != city.Id) {
+    if (tmp_dist < min_dist ) { //&& network->layer.Neurons[i].CityId != city.Id
       min_dist = tmp_dist;
       index = i;
     }
@@ -274,7 +274,7 @@ void updateWeights(SOM *network, int index, City city, int epoch) {
     } else {
       pos = index + i;
     }
-    influence = theta(epoch, radius, getDistanceBMU(network->layer.Neurons[index].Weights[0],network->layer.Neurons[index].Weights[1],network->layer.Neurons[pos].Weights[0],network->layer.Neurons[pos].Weights[1]));
+    influence = theta(epoch, radius, getDistanceBMU(index,0,pos,0));
     network->layer.Neurons[pos].Update[0] =
         learning_rate * influence * (city.Input1 - network->layer.Neurons[pos].Weights[0]);
     network->layer.Neurons[pos].Update[1] =
@@ -314,6 +314,8 @@ double theta(int epoch, int radius, double dist) {
 
 void train(SOM *network, Data *data) {
   int index;
+  time_t t0, t1;
+  time(&t0);
   for (int i = 0; i < EPOCH_MAX; ++i) {
     for (int j = 0; j < data->size; ++j) {
       index = bestMatchingUnit(network, data->cities[j]);
@@ -321,6 +323,10 @@ void train(SOM *network, Data *data) {
       updateWeights(network, index, data->cities[j], i + 1);
       network->layer.Neurons[index].CityId = data->cities[j].Id;
       network->layer.Neurons[index].Registred = 1;
+    }
+    time(&t1);
+    if (t1-t0 >= 290){
+      return;
     }
   }
 }
