@@ -103,7 +103,9 @@ double max(Data *data, int input);
 
 double min(Data *data, int input);
 
-double rand_gauss (void);
+void kmeansPlusPlus(Data *data, VQ *network);
+
+int maxJointDist(double *values, int size);
 
 
 int main(void) {
@@ -130,6 +132,8 @@ int main(void) {
   parseFile(path,&data);
 
   createVQ(&network, NBR_INPUT_NEURONS, data.NbrCluster, &data);
+
+  kmeansPlusPlus(&data,&network);
 
   printDebug(&network);
 
@@ -205,14 +209,10 @@ void createLayer(Layer *layer, int numberNeurons, int numberWeights, Data *data)
 }
 
 void initialiseNeuron(Neuron *neuron, int nbrWeights, Data *data) {
-  int index;
   neuron->Output = 0;
   neuron->Delta = 0;
-  neuron->Weights = (double *) malloc(sizeof(double) * nbrWeights);
+  neuron->Weights = (double *) calloc(nbrWeights, sizeof(double));
   neuron->Update = (double *) calloc(nbrWeights, sizeof(double));
-  //index =  (int)floor((data->size+1)*(double)rand()/RAND_MAX);
-  neuron->Weights[0] = RandRange(min(data,1),max(data,1));
-  neuron->Weights[1] = RandRange(min(data,2),max(data,2));
 }
 
 void computeInput(VQ *network, double input1, double input2){
@@ -444,18 +444,52 @@ double min(Data *data, int input){
   return value;
 }
 
-double rand_gauss (void) {
-  float v1,v2,s;
+void kmeansPlusPlus(Data *data, VQ *network){
+  int centers[data->NbrCluster];
+  int index = 0, nbrInit = 0;
+  double jointDist[data->size];
 
-  do {
-    v1 = 2.0 * ((float) rand()/RAND_MAX) - 1;
-    v2 = 2.0 * ((float) rand()/RAND_MAX) - 1;
+  for (int l = 0; l < data->NbrCluster; ++l) {
+    centers[l] = 0;
+  }
 
-    s = v1*v1 + v2*v2;
-  } while ( s >= 1.0 );
+  for (int l = 0; l < data->size; ++l) {
+    jointDist[l] = 0;
+  }
 
-  if (s == 0.0)
-    return 0.0;
-  else
-    return (v1*sqrt(-2.0 * log(s) / s));
+  index =  (int)floor((data->size+1)*(double)rand()/RAND_MAX);
+  centers[0] = index;
+  nbrInit = 1;
+  network->Output.Neurons[0].Weights[0] = data->Values[index].Input1;
+  network->Output.Neurons[0].Weights[1] = data->Values[index].Input2;
+
+
+  for (int i = 0; i < data->NbrCluster-1; ++i) {
+    for (int k = 0; k < nbrInit; ++k) {
+      for (int j = 0; j < data->size; ++j) {
+        jointDist[j] += getDistance(data->Values[centers[k]].Input1,data->Values[centers[k]].Input2,data->Values[j].Input1,data->Values[j].Input2);
+      }
+    }
+    index = maxJointDist(jointDist,data->size);
+    network->Output.Neurons[nbrInit].Weights[0] = data->Values[index].Input1;
+    network->Output.Neurons[nbrInit].Weights[1] = data->Values[index].Input2;
+    centers[nbrInit] = index;
+    nbrInit++;
+    for (int l = 0; l < data->size; ++l) {
+      jointDist[l] = 0;
+    }
+  }
+}
+
+int maxJointDist(double *values, int size) {
+  double tmp, max = values[0];
+  int index = 0;
+  for (int i = 1; i < size; ++i) {
+    tmp = values[i];
+    if (tmp > max){
+      max = tmp;
+      index = i;
+    }
+  }
+  return index;
 }

@@ -57,38 +57,38 @@ include CMakeFiles/CI_Homework_3.dir/progress.make
 # Include the compile flags for this target's objects.
 include CMakeFiles/CI_Homework_3.dir/flags.make
 
-CMakeFiles/CI_Homework_3.dir/Problem_3/Problem_3.c.o: CMakeFiles/CI_Homework_3.dir/flags.make
-CMakeFiles/CI_Homework_3.dir/Problem_3/Problem_3.c.o: ../Problem\ 3/Problem_3.c
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/gemini/TUM/CI/CI-Homework_3/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building C object CMakeFiles/CI_Homework_3.dir/Problem_3/Problem_3.c.o"
-	/usr/bin/cc  $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -o CMakeFiles/CI_Homework_3.dir/Problem_3/Problem_3.c.o   -c "/home/gemini/TUM/CI/CI-Homework_3/Problem 3/Problem_3.c"
+CMakeFiles/CI_Homework_3.dir/Problem_1/Problem_1.c.o: CMakeFiles/CI_Homework_3.dir/flags.make
+CMakeFiles/CI_Homework_3.dir/Problem_1/Problem_1.c.o: ../Problem\ 1/Problem_1.c
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/gemini/TUM/CI/CI-Homework_3/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building C object CMakeFiles/CI_Homework_3.dir/Problem_1/Problem_1.c.o"
+	/usr/bin/cc  $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -o CMakeFiles/CI_Homework_3.dir/Problem_1/Problem_1.c.o   -c "/home/gemini/TUM/CI/CI-Homework_3/Problem 1/Problem_1.c"
 
-CMakeFiles/CI_Homework_3.dir/Problem_3/Problem_3.c.i: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing C source to CMakeFiles/CI_Homework_3.dir/Problem_3/Problem_3.c.i"
-	/usr/bin/cc  $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E "/home/gemini/TUM/CI/CI-Homework_3/Problem 3/Problem_3.c" > CMakeFiles/CI_Homework_3.dir/Problem_3/Problem_3.c.i
+CMakeFiles/CI_Homework_3.dir/Problem_1/Problem_1.c.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing C source to CMakeFiles/CI_Homework_3.dir/Problem_1/Problem_1.c.i"
+	/usr/bin/cc  $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E "/home/gemini/TUM/CI/CI-Homework_3/Problem 1/Problem_1.c" > CMakeFiles/CI_Homework_3.dir/Problem_1/Problem_1.c.i
 
-CMakeFiles/CI_Homework_3.dir/Problem_3/Problem_3.c.s: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling C source to assembly CMakeFiles/CI_Homework_3.dir/Problem_3/Problem_3.c.s"
-	/usr/bin/cc  $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S "/home/gemini/TUM/CI/CI-Homework_3/Problem 3/Problem_3.c" -o CMakeFiles/CI_Homework_3.dir/Problem_3/Problem_3.c.s
+CMakeFiles/CI_Homework_3.dir/Problem_1/Problem_1.c.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling C source to assembly CMakeFiles/CI_Homework_3.dir/Problem_1/Problem_1.c.s"
+	/usr/bin/cc  $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S "/home/gemini/TUM/CI/CI-Homework_3/Problem 1/Problem_1.c" -o CMakeFiles/CI_Homework_3.dir/Problem_1/Problem_1.c.s
 
-CMakeFiles/CI_Homework_3.dir/Problem_3/Problem_3.c.o.requires:
+CMakeFiles/CI_Homework_3.dir/Problem_1/Problem_1.c.o.requires:
 
-.PHONY : CMakeFiles/CI_Homework_3.dir/Problem_3/Problem_3.c.o.requires
+.PHONY : CMakeFiles/CI_Homework_3.dir/Problem_1/Problem_1.c.o.requires
 
-CMakeFiles/CI_Homework_3.dir/Problem_3/Problem_3.c.o.provides: CMakeFiles/CI_Homework_3.dir/Problem_3/Problem_3.c.o.requires
-	$(MAKE) -f CMakeFiles/CI_Homework_3.dir/build.make CMakeFiles/CI_Homework_3.dir/Problem_3/Problem_3.c.o.provides.build
-.PHONY : CMakeFiles/CI_Homework_3.dir/Problem_3/Problem_3.c.o.provides
+CMakeFiles/CI_Homework_3.dir/Problem_1/Problem_1.c.o.provides: CMakeFiles/CI_Homework_3.dir/Problem_1/Problem_1.c.o.requires
+	$(MAKE) -f CMakeFiles/CI_Homework_3.dir/build.make CMakeFiles/CI_Homework_3.dir/Problem_1/Problem_1.c.o.provides.build
+.PHONY : CMakeFiles/CI_Homework_3.dir/Problem_1/Problem_1.c.o.provides
 
-CMakeFiles/CI_Homework_3.dir/Problem_3/Problem_3.c.o.provides.build: CMakeFiles/CI_Homework_3.dir/Problem_3/Problem_3.c.o
+CMakeFiles/CI_Homework_3.dir/Problem_1/Problem_1.c.o.provides.build: CMakeFiles/CI_Homework_3.dir/Problem_1/Problem_1.c.o
 
 
 # Object files for target CI_Homework_3
 CI_Homework_3_OBJECTS = \
-"CMakeFiles/CI_Homework_3.dir/Problem_3/Problem_3.c.o"
+"CMakeFiles/CI_Homework_3.dir/Problem_1/Problem_1.c.o"
 
 # External object files for target CI_Homework_3
 CI_Homework_3_EXTERNAL_OBJECTS =
 
-CI_Homework_3: CMakeFiles/CI_Homework_3.dir/Problem_3/Problem_3.c.o
+CI_Homework_3: CMakeFiles/CI_Homework_3.dir/Problem_1/Problem_1.c.o
 CI_Homework_3: CMakeFiles/CI_Homework_3.dir/build.make
 CI_Homework_3: CMakeFiles/CI_Homework_3.dir/link.txt
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=/home/gemini/TUM/CI/CI-Homework_3/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Linking C executable CI_Homework_3"
@@ -99,7 +99,7 @@ CMakeFiles/CI_Homework_3.dir/build: CI_Homework_3
 
 .PHONY : CMakeFiles/CI_Homework_3.dir/build
 
-CMakeFiles/CI_Homework_3.dir/requires: CMakeFiles/CI_Homework_3.dir/Problem_3/Problem_3.c.o.requires
+CMakeFiles/CI_Homework_3.dir/requires: CMakeFiles/CI_Homework_3.dir/Problem_1/Problem_1.c.o.requires
 
 .PHONY : CMakeFiles/CI_Homework_3.dir/requires
 
