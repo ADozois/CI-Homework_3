@@ -8,7 +8,7 @@
 #define NBR_INPUT_NEURONS 2
 #define WEIGHT_MAX 0.7
 #define LEARNING_RATE 0.01
-#define EPOXH_MAX 1000
+#define EPOXH_MAX 100
 #define LAMBDA 2
 
 
@@ -118,7 +118,7 @@ int main(void) {
 
   srand((unsigned) time(NULL)); //Seed initialisation
 
-  /*while(scanf("%s",buff) == 1) {
+  while(scanf("%s",buff) == 1) {
     if (flag == 0) {
       data.NbrCluster = atoi(buff);
       flag = 1;
@@ -127,21 +127,21 @@ int main(void) {
       ++i;
     }
   }
-  data.size = i;*/
+  data.size = i;
 
-  parseFile(path,&data);
+  //parseFile(path,&data);
 
   createVQ(&network, NBR_INPUT_NEURONS, data.NbrCluster, &data);
 
   kmeansPlusPlus(&data,&network);
 
-  printDebug(&network);
+  //printDebug(&network);
 
   train(&network,&data);
 
-  //printClusterCenters(&network);
+  printClusterCenters(&network);
 
-  printDebug(&network);
+  //printDebug(&network);
 
   return 0;
 }
