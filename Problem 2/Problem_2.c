@@ -44,7 +44,9 @@ void recovery(Hopfeild *network, Data *data);
 
 void printOutput(Hopfeild *network, Data *data);
 
-int converge(int *output, Data *data);
+int compare(int *output, Data *data);
+
+void findMostSim(int *output, Data *data);
 
 int main (void){
   char *path = "/home/gemini/TUM/CI/CI-Homework_3/Problem 2/testInput22B.txt";
@@ -194,6 +196,7 @@ void recovery(Hopfeild *network, Data *data){
 void printOutput(Hopfeild *network, Data *data) {
   int index;
   for (int pt = 0; pt < data->NbrImage; ++pt) {
+    
     index = 0;
     for (int j = 0; j < 10; ++j) {
       for (int i = 0; i < 20; ++i) {
@@ -209,3 +212,25 @@ void printOutput(Hopfeild *network, Data *data) {
       printf("-\n");
   }
 }
+
+int compare(int *output, Data *data){
+  int counter[data->NbrImage];
+  int max = 0;
+
+  for (int j = 0; j < data->NbrImage; ++j) {
+    counter[j] = 0;
+    for (int i = 0; i < 200; ++i) {
+      if (output[i] == data->Images[j].Img[i])
+        counter[j]++;
+    }
+    if (counter[j] == 200)
+      return -1;
+  }
+
+  for (int k = 1; k < ; ++k) {
+    if (counter[k] > counter[k-1])
+      max = k;
+  }
+  return max;
+}
+
