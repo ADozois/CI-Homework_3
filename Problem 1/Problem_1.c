@@ -8,7 +8,7 @@
 #define NBR_INPUT_NEURONS 2
 #define WEIGHT_MAX 0.7
 #define LEARNING_RATE 0.01
-#define EPOXH_MAX 100
+#define EPOXH_MAX 1000
 #define LAMBDA 2
 
 
@@ -273,7 +273,7 @@ void pickWinner(VQ *network, double input1, double input2, int epoch) {
 
 void train(VQ *network, Data *data){
   for (int j = 0; j < EPOXH_MAX; ++j) {
-      kmean(data,network);
+    kmean(data,network);
   }
 
 }
